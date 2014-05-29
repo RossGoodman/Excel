@@ -1,1 +1,39 @@
-xxxx
+Sub generateTimesheet()
+    Dim OlApp As Outlook.Application
+    Dim OlNameSpace As Outlook.Namespace
+    Dim objFolder As Outlook.MAPIFolder
+    Dim olAppointments As Object
+    Dim olItems, olFinalItems As Outlook.Items
+    Dim olAppointmentItem As Outlook.AppointmentItem
+    Dim dtStart, dtEnd As Date
+    Dim strRestriction As String
+    
+    dtStart = Format(Date - 7, "dd/mm/yyyy hh:mm AMPM")
+    dtEnd = Format(Date + 1, "dd/mm/yyyy hh:mm AMPM")
+    strRestriction = "[Start] >= '" & dtStart & "' AND [Start] <= '" & dtEnd & "'"
+    
+    Set OlApp = New Outlook.Application
+    Set OlNameSpace = OlApp.GetNamespace("MAPI")
+    Set olAppointments = OlNameSpace.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderCalendar)
+    Set olItems = olAppointments.Items
+    olItems.IncludeRecurrences = True
+    olItems.Sort "[Start]"
+    Set olFinalItems = olItems.Restrict(strRestriction)
+    Excel.ActiveWorkbook.ActiveSheet.Range("a2", Range("a2").End(xlDown).End(xlToRight)).Select
+    Selection.Clear
+    For Each olAppointmentItem In olFinalItems
+        If Excel.ActiveWorkbook.ActiveSheet.Range("a2").Value = "" Then
+            Excel.ActiveWorkbook.ActiveSheet.Range("a2").Select
+        Else
+            Excel.ActiveWorkbook.ActiveSheet.Range("a1").End(xlDown).Offset(1, 0).Select
+        End If
+'        ActiveCell.Value = Format(olAppointmentItem.Start, "dd/mm/yyyy")
+        ActiveCell.Offset(0, 0).Value = Format(olAppointmentItem.Start, "Dddd")
+        ActiveCell.Offset(0, 1).Value = Format(olAppointmentItem.Start, "Medium Date")
+        ActiveCell.Offset(0, 2).Value = olAppointmentItem.Subject
+        ActiveCell.Offset(0, 3).Value = Format(olAppointmentItem.Start, "hh:mm:ss")
+        ActiveCell.Offset(0, 4).Value = olAppointmentItem.Duration
+    Next
+    Excel.ActiveWorkbook.ActiveSheet.Range("a1").Select
+    
+End Sub
