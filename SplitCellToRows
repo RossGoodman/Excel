@@ -1,0 +1,10 @@
+Public Sub SplitCellToRows()
+    arrValues = Split(ActiveCell.Value, vbLf)
+    For i = UBound(arrValues) To LBound(arrValues) Step -1
+        'MsgBox i & " " & arrValues(i)
+        If i > 0 Then
+            ActiveCell.Offset(1).Resize(1).EntireRow.Insert (1)
+        End If
+        ActiveCell.Offset(Sgn(i)).Value = arrValues(i)
+    Next i
+End Sub
